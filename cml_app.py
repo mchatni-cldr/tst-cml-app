@@ -42,7 +42,7 @@ def main():
     # Start Flask
     app.run(
         host='127.0.0.1',
-        port=os.genenv('CDSW_APP_PORT'),
+        port=os.getenv('CDSW_APP_PORT'),
         debug=False,
         threaded=True
     )
