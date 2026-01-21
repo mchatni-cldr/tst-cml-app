@@ -2,8 +2,11 @@ from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 import os
 
+# CML project directory
+PROJECT_DIR = '/home/cdsw'
+
 app = Flask(__name__, 
-            static_folder='../frontend/dist',
+            static_folder=os.path.join(PROJECT_DIR, 'frontend/dist'),
             static_url_path='')
 
 CORS(app)
@@ -20,9 +23,10 @@ def health():
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve_frontend(path):
-    if path and os.path.exists(os.path.join(app.static_folder, path)):
-        return send_from_directory(app.static_folder, path)
-    return send_from_directory(app.static_folder, 'index.html')
+    static_dir = os.path.join(PROJECT_DIR, 'frontend/dist')
+    if path and os.path.exists(os.path.join(static_dir, path)):
+        return send_from_directory(static_dir, path)
+    return send_from_directory(static_dir, 'index.html')
 
 if __name__ == '__main__':
     port = int(os.environ.get('CDSW_APP_PORT', 8080))

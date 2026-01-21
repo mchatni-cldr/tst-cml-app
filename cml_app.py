@@ -1,63 +1,31 @@
 """
 Cloudera ML Application Entry Point
+Serves pre-built frontend from git
 """
 import os
 import sys
-import subprocess
+
+# CML project directory
+PROJECT_DIR = '/home/cdsw'
 
 # Add backend to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'backend'))
-
-def build_frontend():
-    """Build React frontend"""
-    print("=" * 60)
-    print("Building frontend...")
-    print("=" * 60)
-    
-    frontend_dir = os.path.join(os.path.dirname(__file__), 'frontend')
-    
-    # Install npm dependencies
-    print("\n📦 Installing npm packages...")
-    result = subprocess.run(
-        ['npm', 'install'], 
-        cwd=frontend_dir,
-        capture_output=True,
-        text=True
-    )
-    
-    if result.returncode != 0:
-        print("❌ npm install failed:")
-        print(result.stderr)
-        raise Exception("Frontend build failed at npm install")
-    
-    print("✅ npm install complete")
-    
-    # Build production bundle
-    print("\n🔨 Building production bundle...")
-    result = subprocess.run(
-        ['npm', 'run', 'build'], 
-        cwd=frontend_dir,
-        capture_output=True,
-        text=True
-    )
-    
-    if result.returncode != 0:
-        print("❌ npm build failed:")
-        print(result.stderr)
-        raise Exception("Frontend build failed at npm build")
-    
-    print("✅ Frontend build complete!")
-    print("=" * 60)
+sys.path.insert(0, os.path.join(PROJECT_DIR, 'backend'))
 
 def main():
-    # Check if frontend needs building
-    dist_path = os.path.join(os.path.dirname(__file__), 'frontend/dist/index.html')
+    # Check if frontend dist exists
+    dist_path = os.path.join(PROJECT_DIR, 'frontend/dist/index.html')
     
     if not os.path.exists(dist_path):
-        print("Frontend not built yet, building now...")
-        build_frontend()
-    else:
-        print("✅ Frontend already built (frontend/dist exists)")
+        print("❌ ERROR: Frontend not built!")
+        print(f"Looking for: {dist_path}")
+        print("\nDirectory contents:")
+        print(os.listdir(PROJECT_DIR))
+        if os.path.exists(os.path.join(PROJECT_DIR, 'frontend')):
+            print("\nFrontend directory contents:")
+            print(os.listdir(os.path.join(PROJECT_DIR, 'frontend')))
+        sys.exit(1)
+    
+    print("✅ Using pre-built frontend from git")
     
     # Import and run Flask app
     from backend.app import app
@@ -74,7 +42,7 @@ def main():
     # Start Flask
     app.run(
         host='127.0.0.1',
-        port=port,
+        port=os.genenv('CDSW_APP_PORT'),
         debug=False,
         threaded=True
     )
